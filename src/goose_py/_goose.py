@@ -88,6 +88,38 @@ class Goose:
         """Apply all pending migrations."""
         return self.run("up")
 
+    def up_by_one(self) -> GooseResult:
+        """Apply the next pending migration."""
+        return self.run("up-by-one")
+
+    def up_to(self, version: int) -> GooseResult:
+        """Apply pending migrations up to and including ``version``."""
+        return self.run("up-to", str(version))
+
+    def down(self) -> GooseResult:
+        """Roll back the latest migration."""
+        return self.run("down")
+
+    def down_to(self, version: int) -> GooseResult:
+        """Roll back to ``version``."""
+        return self.run("down-to", str(version))
+
+    def redo(self) -> GooseResult:
+        """Roll back and re-apply the latest migration."""
+        return self.run("redo")
+
+    def reset(self) -> GooseResult:
+        """Roll back all migrations."""
+        return self.run("reset")
+
+    def validate(self) -> GooseResult:
+        """Check migration files without running them."""
+        return self.run("validate")
+
+    def fix(self) -> GooseResult:
+        """Rename timestamped migrations to sequential numbering."""
+        return self.run("fix")
+
     def _flags(self) -> list[str]:
         flags = ["-env=none"]
         if self.allow_missing:
