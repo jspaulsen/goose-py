@@ -6,9 +6,19 @@ goose-py does **not** ship the goose binary. Install goose yourself; goose-py ru
 
 ## Install
 
+goose-py isn't published to PyPI. Install it from GitHub, pinned to a release tag:
+
 ```sh
-pip install goose-py
+uv add git+https://github.com/jspaulsen/goose-py --tag v0.1.0
 ```
+
+Or with pip:
+
+```sh
+pip install "goose-py @ git+https://github.com/jspaulsen/goose-py@v0.1.0"
+```
+
+See [Releases](https://github.com/jspaulsen/goose-py/releases) for available tags.
 
 goose-py looks for the binary in this order:
 
