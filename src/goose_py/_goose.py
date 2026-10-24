@@ -81,6 +81,10 @@ class Goose:
             )
         return result
 
+    def up(self) -> GooseResult:
+        """Apply all pending migrations."""
+        return self.run("up")
+
     def _flags(self) -> list[str]:
         flags = ["-env=none"]
         if self.allow_missing:

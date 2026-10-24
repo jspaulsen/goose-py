@@ -85,3 +85,7 @@ def test_timeout_raises(fake_goose, monkeypatch):
     monkeypatch.setenv("FAKE_SLEEP", "5")
     with pytest.raises(GooseTimeoutError):
         Goose("sqlite3", "x.db", timeout=0.2).run("up")
+
+
+def test_up(fake_goose):
+    assert fake_goose(Goose("sqlite3", "x.db").up())["argv"] == ["-env=none", "up"]
