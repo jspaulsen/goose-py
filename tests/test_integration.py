@@ -38,3 +38,11 @@ def test_up_against_sqlite(tmp_path, migrations):
 def test_bad_migration_dir_raises(tmp_path):
     with pytest.raises(GooseCommandError, match="does not exist"):
         Goose("sqlite3", str(tmp_path / "x.db"), tmp_path / "nope").up()
+
+
+def test_up_then_down_against_sqlite(tmp_path, migrations):
+    db = tmp_path / "x.db"
+    g = Goose("sqlite3", str(db), migrations)
+    g.up()
+    g.down()
+    assert "t" not in _tables(db)

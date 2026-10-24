@@ -110,3 +110,20 @@ def test_unexecutable_binary_raises_goose_error(tmp_path, monkeypatch):
     monkeypatch.setenv("GOOSE_BINARY", str(exe))
     with pytest.raises(GooseNotFoundError, match="could not execute"):
         Goose("sqlite3", "x.db").up()
+
+
+@pytest.mark.parametrize(
+    "call,expected",
+    [
+        (lambda g: g.up_by_one(), ["up-by-one"]),
+        (lambda g: g.up_to(3), ["up-to", "3"]),
+        (lambda g: g.down(), ["down"]),
+        (lambda g: g.down_to(0), ["down-to", "0"]),
+        (lambda g: g.redo(), ["redo"]),
+        (lambda g: g.reset(), ["reset"]),
+        (lambda g: g.validate(), ["validate"]),
+        (lambda g: g.fix(), ["fix"]),
+    ],
+)
+def test_command_argv(fake_goose, call, expected):
+    assert fake_goose(call(Goose("sqlite3", "x.db")))["argv"] == ["-env=none", *expected]
