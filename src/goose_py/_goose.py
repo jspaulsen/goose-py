@@ -1,10 +1,11 @@
+import json
 import os
 import subprocess
 from collections.abc import Callable, Mapping
 
 from goose_py._binary import find_binary
 from goose_py._result import GooseResult
-from goose_py.errors import GooseCommandError, GooseTimeoutError
+from goose_py.errors import GooseCommandError, GooseNotFoundError, GooseTimeoutError
 
 _REDACTED = "***"
 _STDERR_TAIL_LINES = 10
@@ -66,6 +67,8 @@ class Goose:
             raise GooseTimeoutError(
                 f"goose {' '.join(shown_args)} timed out after {self.timeout}s"
             ) from None
+        except OSError as e:
+            raise GooseNotFoundError(f"could not execute goose: {e.strerror}") from None
 
         result = GooseResult(
             args=shown_args,
@@ -110,4 +113,6 @@ class Goose:
 def _redactor(secret: str) -> Callable[[str], str]:
     if not secret:
         return lambda text: text
-    return lambda text: text.replace(secret, _REDACTED)
+    # goose echoes an unknown driver's DSN Go-%q-quoted; JSON escaping matches that.
+    quoted = json.dumps(secret, ensure_ascii=False)[1:-1]
+    return lambda text: text.replace(secret, _REDACTED).replace(quoted, _REDACTED)

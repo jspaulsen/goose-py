@@ -9,7 +9,7 @@ def find_binary() -> str:
     override = os.environ.get("GOOSE_BINARY")
     if override:
         if os.path.isfile(override) and os.access(override, os.X_OK):
-            return override
+            return os.path.abspath(override)
         raise GooseNotFoundError(
             f"GOOSE_BINARY is set to {override!r}, which is not an executable file"
         )

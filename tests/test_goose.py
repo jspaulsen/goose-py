@@ -1,8 +1,9 @@
+import json
 import pathlib
 
 import pytest
 
-from goose_py import Goose, GooseCommandError, GooseTimeoutError
+from goose_py import Goose, GooseCommandError, GooseNotFoundError, GooseTimeoutError
 
 DSN = "postgres://u:secret@h/db"
 
@@ -89,3 +90,23 @@ def test_timeout_raises(fake_goose, monkeypatch):
 
 def test_up(fake_goose):
     assert fake_goose(Goose("sqlite3", "x.db").up())["argv"] == ["-env=none", "up"]
+
+
+def test_go_quoted_dsn_is_redacted(fake_goose, monkeypatch):
+    # goose logs an unknown driver's DSN with Go's %q, which escapes quotes/backslashes.
+    dsn = "user=alice password='hun\\'ter2\"x'"
+    monkeypatch.setenv("FAKE_EXIT", "1")
+    monkeypatch.setenv("FAKE_STDERR", f"-dbstring={json.dumps(dsn)}: unknown dialect")
+    with pytest.raises(GooseCommandError) as ei:
+        Goose("postgresql", dsn).run("up")
+    assert "ter2" not in str(ei.value)
+    assert "ter2" not in ei.value.result.stderr
+
+
+def test_unexecutable_binary_raises_goose_error(tmp_path, monkeypatch):
+    exe = tmp_path / "goose"
+    exe.write_bytes(b"\x7fELF not really")
+    exe.chmod(0o755)
+    monkeypatch.setenv("GOOSE_BINARY", str(exe))
+    with pytest.raises(GooseNotFoundError, match="could not execute"):
+        Goose("sqlite3", "x.db").up()

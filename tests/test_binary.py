@@ -34,3 +34,10 @@ def test_not_found_anywhere(tmp_path, monkeypatch):
     monkeypatch.setenv("PATH", str(tmp_path))
     with pytest.raises(GooseNotFoundError, match="install goose"):
         find_binary()
+
+
+def test_relative_goose_binary_is_made_absolute(tmp_path, monkeypatch):
+    _make_exe(tmp_path / "mygoose")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("GOOSE_BINARY", "mygoose")
+    assert find_binary() == str(tmp_path / "mygoose")
